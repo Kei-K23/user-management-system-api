@@ -24,7 +24,6 @@ func NewUserRepository() UserRepository {
 func (r *userRepository) CreateUser(user *models.User) error {
 	query := `INSERT INTO users (username, full_name, email, password_hashed, role_id) VALUES ($1, $2, $3, $4, $5) RETURNING id`
 
-	// TODO Hash password
 	return config.DB.QueryRow(context.Background(), query, user.Username, user.FullName, user.Email, user.Password, user.RoleId).Scan(&user.Id)
 }
 
