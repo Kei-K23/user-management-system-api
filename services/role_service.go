@@ -32,3 +32,16 @@ func (r *RoleService) GetById(id int) (*models.Role, error) {
 func (r *RoleService) GetByName(name string) (*models.Role, error) {
 	return r.roleRepo.GetRoleByName(name)
 }
+
+func (r *RoleService) Update(id int, name, description string) (*models.Role, error) {
+	role := &models.Role{
+		Name:        name,
+		Description: description,
+	}
+
+	return r.roleRepo.UpdateRole(id, role)
+}
+
+func (r *RoleService) Delete(id int) (int, error) {
+	return r.roleRepo.DeleteRole(id)
+}
