@@ -8,9 +8,11 @@ import (
 )
 
 type RoleRepository interface {
-	CreateRole(role *models.Role) error
+	CreateRole(role *models.Role) (*models.Role, error)
 	GetRoleById(id int) (*models.Role, error)
 	GetRoleByName(name string) (*models.Role, error)
+	DeleteRole(id int) (int, error)
+	UpdateRole(id int, role *models.Role) (*models.Role, error)
 }
 
 type roleRepository struct {
@@ -21,9 +23,10 @@ func NewRoleRepository() RoleRepository {
 }
 
 // CreateRole implements RoleRepository.
-func (r *roleRepository) CreateRole(role *models.Role) error {
+func (r *roleRepository) CreateRole(role *models.Role) (*models.Role, error) {
 	query := `INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id`
-	return config.DB.QueryRow(context.Background(), query, role.Name, role.Description).Scan(&role.Id)
+	err := config.DB.QueryRow(context.Background(), query, role.Name, role.Description).Scan(&role.Id)
+	return role, err
 }
 
 // GetRoleById implements RoleRepository.
@@ -41,5 +44,24 @@ func (r *roleRepository) GetRoleByName(name string) (*models.Role, error) {
 	query := `SELECT * from roles WHERE name = $1`
 
 	err := config.DB.QueryRow(context.Background(), query, name).Scan(&role.Id, &role.Name, &role.Description)
+	return role, err
+}
+
+// DeleteRole implements RoleRepository.
+func (r *roleRepository) DeleteRole(id int) (int, error) {
+	query := `DELETE FROM roles WHERE id = $1`
+
+	_, err := config.DB.Exec(context.Background(), query, id)
+	return id, err
+}
+
+// UpdateRole implements RoleRepository.
+func (r *roleRepository) UpdateRole(id int, role *models.Role) (*models.Role, error) {
+	query := `UPDATE roles 
+	SET name = $1, description = $2
+	WHERE id = $3`
+
+	err := config.DB.QueryRow(context.Background(), query, role.Name, role.Description, id).Scan(&role.Id, &role.Name, &role.Description)
+
 	return role, err
 }

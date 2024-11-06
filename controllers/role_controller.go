@@ -21,9 +21,11 @@ func (r *RoleController) CreateRole(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
-	if err := r.roleService.Create(input.Name, input.Description); err != nil {
+	role, err := r.roleService.Create(input.Name, input.Description)
+
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create role"})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Successfully created new role"})
+	return c.Status(fiber.StatusCreated).JSON(role)
 }

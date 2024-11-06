@@ -14,7 +14,7 @@ func NewRoleService(roleRepo repositories.RoleRepository) *RoleService {
 }
 
 // CreateRole implements RoleService.
-func (r *RoleService) Create(name, description string) error {
+func (r *RoleService) Create(name, description string) (*models.Role, error) {
 	role := &models.Role{
 		Name:        name,
 		Description: description,
