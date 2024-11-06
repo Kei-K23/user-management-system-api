@@ -1,4 +1,4 @@
-package db
+package config
 
 import (
 	"context"
@@ -8,10 +8,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var Pool *pgxpool.Pool
+var DB *pgxpool.Pool
 
 func ConnectDB() {
-	dsn := os.Getenv("DB_CONNECTION_URL") // Fetch from environment variable
+	dsn := os.Getenv("DB_CONNECTION_URL")
 	if dsn == "" {
 		log.Fatal("DB_CONNECTION_URL is not set")
 	}
@@ -23,7 +23,7 @@ func ConnectDB() {
 	}
 
 	// Establish connection
-	Pool, err = pgxpool.NewWithConfig(context.Background(), config)
+	DB, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
 		log.Fatalf("Error when connecting to database: %v", err)
 	}
