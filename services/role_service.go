@@ -5,31 +5,25 @@ import (
 	"github.com/Kei-K23/user-management-system-api/repositories"
 )
 
-type RoleService interface {
-	CreateRole(role models.Role) error
-	GetRoleById(id int) (*models.Role, error)
-	GetRoleByName(name string) (*models.Role, error)
-}
-
-type roleService struct {
+type RoleService struct {
 	roleRepo repositories.RoleRepository
 }
 
-func NewRoleService(roleRepo repositories.RoleRepository) RoleService {
-	return &roleService{roleRepo}
+func NewRoleService(roleRepo repositories.RoleRepository) *RoleService {
+	return &RoleService{roleRepo}
 }
 
 // CreateRole implements RoleService.
-func (r *roleService) CreateRole(role models.Role) error {
+func (r *RoleService) Create(role models.Role) error {
 	return r.roleRepo.CreateRole(role)
 }
 
 // GetRoleById implements RoleService.
-func (r *roleService) GetRoleById(id int) (*models.Role, error) {
+func (r *RoleService) GetById(id int) (*models.Role, error) {
 	return r.roleRepo.GetRoleById(id)
 }
 
 // GetRoleByName implements RoleService.
-func (r *roleService) GetRoleByName(name string) (*models.Role, error) {
+func (r *RoleService) GetByName(name string) (*models.Role, error) {
 	return r.roleRepo.GetRoleByName(name)
 }
