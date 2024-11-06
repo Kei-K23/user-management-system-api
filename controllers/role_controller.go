@@ -1,27 +1,29 @@
 package controllers
 
 import (
-	"github.com/Kei-K23/user-management-system-api/models"
+	"github.com/Kei-K23/user-management-system-api/dto"
 	"github.com/Kei-K23/user-management-system-api/services"
 	"github.com/gofiber/fiber/v2"
 )
 
-func CreateRole(roleService services.RoleService) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		// Get and parse request body
-		var req map[string]string
-		if err := c.BodyParser(&req); err != nil {
-			return err
-		}
+type RoleController struct {
+	roleService services.RoleService
+}
 
-		role := models.Role{
-			Name:        req["name"],
-			Description: req["description"],
-		}
+func NewRoleController(roleService services.RoleService) *RoleController {
+	return &RoleController{roleService}
+}
 
-		if err := roleService.CreateRole(role); err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, "Failed to create role")
-		}
-		return c.Status(fiber.StatusCreated).JSON(role)
+func (r *RoleController) CreateRole(c *fiber.Ctx) error {
+	var input dto.CreateRoleInput
+
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
+
+	if err := r.roleService.Create(input.Name, input.Description); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create role"})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Successfully created new role"})
 }

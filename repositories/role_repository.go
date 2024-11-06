@@ -8,7 +8,7 @@ import (
 )
 
 type RoleRepository interface {
-	CreateRole(role models.Role) error
+	CreateRole(role *models.Role) error
 	GetRoleById(id int) (*models.Role, error)
 	GetRoleByName(name string) (*models.Role, error)
 }
@@ -21,7 +21,7 @@ func NewRoleRepository() RoleRepository {
 }
 
 // CreateRole implements RoleRepository.
-func (r *roleRepository) CreateRole(role models.Role) error {
+func (r *roleRepository) CreateRole(role *models.Role) error {
 	query := `INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id`
 	return config.DB.QueryRow(context.Background(), query, role.Name, role.Description).Scan(&role.Id)
 }
