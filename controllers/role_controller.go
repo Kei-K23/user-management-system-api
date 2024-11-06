@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/Kei-K23/user-management-system-api/dto"
+	"github.com/Kei-K23/user-management-system-api/models"
 	"github.com/Kei-K23/user-management-system-api/services"
 	"github.com/gofiber/fiber/v2"
 )
@@ -39,6 +40,7 @@ func (r *RoleController) GetRoleById(c *fiber.Ctx) error {
 	}
 
 	role, err := r.roleService.GetById(id)
+
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when getting role"})
 	}
@@ -46,15 +48,26 @@ func (r *RoleController) GetRoleById(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(role)
 }
 
-func (r *RoleController) GetRoleByName(c *fiber.Ctx) error {
+func (r *RoleController) GetRoles(c *fiber.Ctx) error {
+	var roles []*models.Role
 	name := c.Query("name")
 
-	role, err := r.roleService.GetByName(name)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when getting role"})
+	if name != "" {
+		role, err := r.roleService.GetByName(name)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when getting role by name"})
+		}
+
+		roles = append(roles, role)
+	} else {
+		rolesData, err := r.roleService.GetRoles()
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when getting roles"})
+		}
+		roles = append(roles, rolesData...)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(role)
+	return c.Status(fiber.StatusOK).JSON(roles)
 }
 
 func (r *RoleController) UpdateRole(c *fiber.Ctx) error {
@@ -70,10 +83,23 @@ func (r *RoleController) UpdateRole(c *fiber.Ctx) error {
 	}
 
 	role, err := r.roleService.Update(id, input.Name, input.Description)
-
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when updating role"})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(role)
+}
+
+func (r *RoleController) DeleteRole(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when converting string to int"})
+	}
+
+	roleId, err := r.roleService.Delete(id)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when deleting role"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"id": roleId})
 }

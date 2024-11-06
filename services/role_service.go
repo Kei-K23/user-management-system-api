@@ -24,6 +24,11 @@ func (r *RoleService) Create(name, description string) (*models.Role, error) {
 }
 
 // GetRoleById implements RoleService.
+func (r *RoleService) GetRoles() ([]*models.Role, error) {
+	return r.roleRepo.GetRoles()
+}
+
+// GetRoleById implements RoleService.
 func (r *RoleService) GetById(id int) (*models.Role, error) {
 	return r.roleRepo.GetRoleById(id)
 }
