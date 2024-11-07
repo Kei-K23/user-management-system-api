@@ -2,11 +2,14 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Kei-K23/user-management-system-api/config"
 	"github.com/Kei-K23/user-management-system-api/models"
 	"github.com/jackc/pgx/v5"
 )
+
+var ErrUserNotFound = errors.New("user not found")
 
 type UserRepository interface {
 	CreateUser(user *models.User) (*models.User, error)
@@ -40,7 +43,15 @@ func (r *userRepository) GetUserById(id int) (*models.User, error) {
 
 	err := config.DB.QueryRow(context.Background(), query, id).Scan(&user.Id, &user.Username, &user.FullName, &user.Email, &user.RoleId, &user.CreatedAt, &user.UpdatedAt)
 
-	return user, err
+	if err == pgx.ErrNoRows {
+		return nil, ErrUserNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // GetUserByUsername implements UserRepository.
@@ -49,7 +60,16 @@ func (r *userRepository) GetUserByUsername(username string) (*models.User, error
 	query := `SELECT id, username, full_name, email, role_id, created_at, updated_at WHERE username = $1`
 
 	err := config.DB.QueryRow(context.Background(), query, username).Scan(&user.Id, &user.Username, &user.FullName, &user.Email, &user.RoleId, &user.CreatedAt, &user.UpdatedAt)
-	return user, err
+
+	if err == pgx.ErrNoRows {
+		return nil, ErrUserNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // GetUsers implements UserRepository.

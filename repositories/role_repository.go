@@ -49,7 +49,7 @@ func (r *roleRepository) GetRoleById(id int) (*models.Role, error) {
 		return nil, err
 	}
 
-	return role, err
+	return role, nil
 }
 
 // GetRoleByName implements RoleRepository.
@@ -67,7 +67,7 @@ func (r *roleRepository) GetRoleByName(name string) (*models.Role, error) {
 		return nil, err
 	}
 
-	return role, err
+	return role, nil
 }
 
 // GetRoles implements RoleRepository.
