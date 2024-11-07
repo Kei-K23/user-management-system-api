@@ -5,6 +5,7 @@ import (
 
 	"github.com/Kei-K23/user-management-system-api/dto"
 	"github.com/Kei-K23/user-management-system-api/models"
+	"github.com/Kei-K23/user-management-system-api/repositories"
 	"github.com/Kei-K23/user-management-system-api/services"
 	"github.com/gofiber/fiber/v2"
 )
@@ -41,6 +42,10 @@ func (r *RoleController) GetRoleById(c *fiber.Ctx) error {
 
 	role, err := r.roleService.GetById(id)
 
+	if err == repositories.ErrRoleNotFound {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when getting role"})
 	}
@@ -54,6 +59,11 @@ func (r *RoleController) GetRoles(c *fiber.Ctx) error {
 
 	if name != "" {
 		role, err := r.roleService.GetByName(name)
+
+		if err == repositories.ErrRoleNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		}
+
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when getting role by name"})
 		}
@@ -61,6 +71,10 @@ func (r *RoleController) GetRoles(c *fiber.Ctx) error {
 		roles = append(roles, role)
 	} else {
 		rolesData, err := r.roleService.GetRoles()
+		if err == repositories.ErrRoleNotFound {
+			return c.Status(fiber.StatusNotFound).JSON([]models.Role{})
+		}
+
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when getting roles"})
 		}
