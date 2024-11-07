@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log"
+
 	"github.com/Kei-K23/user-management-system-api/models"
 	"github.com/Kei-K23/user-management-system-api/repositories"
 	"github.com/Kei-K23/user-management-system-api/utils"
@@ -11,8 +13,8 @@ type AuthService struct {
 	userRepo repositories.UserRepository
 }
 
-func NewAuthService(userRepo repositories.UserRepository) *UserService {
-	return &UserService{userRepo}
+func NewAuthService(userRepo repositories.UserRepository) *AuthService {
+	return &AuthService{userRepo}
 }
 
 func (u *AuthService) Register(username, fullName, email, password string, roleId int) (*models.User, error) {
@@ -35,13 +37,14 @@ func (u *AuthService) Register(username, fullName, email, password string, roleI
 
 func (u *AuthService) Login(username, password string) (string, error) {
 
-	user, err := u.userRepo.GetUserByUsername(username)
+	user, err := u.userRepo.GetDetailUserByUsername(username)
 	if err != nil {
 		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err == bcrypt.ErrMismatchedHashAndPassword {
+	if err != nil {
+		log.Fatal(err)
 		return "", err
 	}
 

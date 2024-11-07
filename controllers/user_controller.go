@@ -18,14 +18,14 @@ func NewUserController(userService services.UserService) *UserController {
 	return &UserController{userService}
 }
 
-func (r *UserController) CreateUser(c *fiber.Ctx) error {
+func (u *UserController) CreateUser(c *fiber.Ctx) error {
 	var input dto.CreateUserInput
 
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
-	user, err := r.userService.Create(input.Username, input.FullName, input.Email, input.Password, input.RoleId)
+	user, err := u.userService.Create(input.Username, input.FullName, input.Email, input.Password, input.RoleId)
 
 	if err != nil {
 
@@ -35,13 +35,13 @@ func (r *UserController) CreateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(user)
 }
 
-func (r *UserController) GetUserById(c *fiber.Ctx) error {
+func (u *UserController) GetUserById(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when converting string to int"})
 	}
 
-	user, err := r.userService.GetById(id)
+	user, err := u.userService.GetById(id)
 
 	if err == repositories.ErrUserNotFound {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
@@ -54,12 +54,12 @@ func (r *UserController) GetUserById(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(user)
 }
 
-func (r *UserController) GetUsers(c *fiber.Ctx) error {
+func (u *UserController) GetUsers(c *fiber.Ctx) error {
 	var users []*models.User
 	username := c.Query("username")
 
 	if username != "" {
-		user, err := r.userService.GetByUsername(username)
+		user, err := u.userService.GetByUsername(username)
 
 		if err == repositories.ErrUserNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
@@ -71,7 +71,7 @@ func (r *UserController) GetUsers(c *fiber.Ctx) error {
 
 		users = append(users, user)
 	} else {
-		usersData, err := r.userService.GetUsers()
+		usersData, err := u.userService.GetUsers()
 		if err == repositories.ErrUserNotFound {
 			return c.Status(fiber.StatusNotFound).JSON([]models.User{})
 		}
@@ -85,7 +85,7 @@ func (r *UserController) GetUsers(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(users)
 }
 
-func (r *UserController) UpdateUser(c *fiber.Ctx) error {
+func (u *UserController) UpdateUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when converting string to int"})
@@ -97,7 +97,7 @@ func (r *UserController) UpdateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
-	role, err := r.userService.Update(id, input.Username, input.FullName, input.Email, input.Password, input.RoleId)
+	role, err := u.userService.Update(id, input.Username, input.FullName, input.Email, input.Password, input.RoleId)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when updating user"})
 	}
@@ -105,13 +105,13 @@ func (r *UserController) UpdateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(role)
 }
 
-func (r *UserController) DeleteUser(c *fiber.Ctx) error {
+func (u *UserController) DeleteUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when converting string to int"})
 	}
 
-	roleId, err := r.userService.Delete(id)
+	roleId, err := u.userService.Delete(id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error when deleting user"})
 	}

@@ -18,6 +18,7 @@ type UserRepository interface {
 	GetUsers() ([]*models.User, error)
 	GetUserById(id int) (*models.User, error)
 	GetUserByUsername(username string) (*models.User, error)
+	GetDetailUserByUsername(username string) (*models.User, error)
 }
 
 type userRepository struct {
@@ -60,6 +61,23 @@ func (r *userRepository) GetUserByUsername(username string) (*models.User, error
 	query := `SELECT id, username, full_name, email, role_id, created_at, updated_at FROM users WHERE username = $1`
 
 	err := config.DB.QueryRow(context.Background(), query, username).Scan(&user.Id, &user.Username, &user.FullName, &user.Email, &user.RoleId, &user.CreatedAt, &user.UpdatedAt)
+
+	if err == pgx.ErrNoRows {
+		return nil, ErrUserNotFound
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) GetDetailUserByUsername(username string) (*models.User, error) {
+	user := &models.User{}
+	query := `SELECT id, username, full_name, email, password_hash, role_id, created_at, updated_at FROM users WHERE username = $1`
+
+	err := config.DB.QueryRow(context.Background(), query, username).Scan(&user.Id, &user.Username, &user.FullName, &user.Email, &user.Password, &user.RoleId, &user.CreatedAt, &user.UpdatedAt)
 
 	if err == pgx.ErrNoRows {
 		return nil, ErrUserNotFound

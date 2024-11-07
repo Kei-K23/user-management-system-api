@@ -29,4 +29,10 @@ func SetupRoutes(app *fiber.App) {
 	apiV1.Post("/users", userController.CreateUser)
 	apiV1.Put("/users/:id", userController.UpdateUser)
 	apiV1.Delete("/users/:id", userController.DeleteUser)
+
+	// Auth
+	authService := services.NewAuthService(userRepo)
+	authController := controllers.NewAuthController(*authService)
+	apiV1.Post("/auth/login", authController.Login)
+	apiV1.Post("/auth/register", authController.Register)
 }
