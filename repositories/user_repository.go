@@ -29,9 +29,9 @@ func NewUserRepository() UserRepository {
 
 // CreateUser implements UserRepository.
 func (r *userRepository) CreateUser(user *models.User) (*models.User, error) {
-	query := `INSERT INTO users (username, full_name, email, password_hashed, role_id) VALUES ($1, $2, $3, $4, $5) RETURNING id`
+	query := `INSERT INTO users (username, full_name, email, password_hash, role_id) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at, updated_at`
 
-	err := config.DB.QueryRow(context.Background(), query, user.Username, user.FullName, user.Email, user.Password, user.RoleId).Scan(&user.Id)
+	err := config.DB.QueryRow(context.Background(), query, user.Username, user.FullName, user.Email, user.Password, user.RoleId).Scan(&user.Id, &user.CreatedAt, &user.UpdatedAt)
 
 	return user, err
 }
@@ -39,7 +39,7 @@ func (r *userRepository) CreateUser(user *models.User) (*models.User, error) {
 // GetUserById implements UserRepository.
 func (r *userRepository) GetUserById(id int) (*models.User, error) {
 	user := &models.User{}
-	query := `SELECT id, username, full_name, email, role_id, created_at, updated_at WHERE id = $1`
+	query := `SELECT id, username, full_name, email, role_id, created_at, updated_at FROM users WHERE id = $1`
 
 	err := config.DB.QueryRow(context.Background(), query, id).Scan(&user.Id, &user.Username, &user.FullName, &user.Email, &user.RoleId, &user.CreatedAt, &user.UpdatedAt)
 
@@ -57,7 +57,7 @@ func (r *userRepository) GetUserById(id int) (*models.User, error) {
 // GetUserByUsername implements UserRepository.
 func (r *userRepository) GetUserByUsername(username string) (*models.User, error) {
 	user := &models.User{}
-	query := `SELECT id, username, full_name, email, role_id, created_at, updated_at WHERE username = $1`
+	query := `SELECT id, username, full_name, email, role_id, created_at, updated_at FROM users WHERE username = $1`
 
 	err := config.DB.QueryRow(context.Background(), query, username).Scan(&user.Id, &user.Username, &user.FullName, &user.Email, &user.RoleId, &user.CreatedAt, &user.UpdatedAt)
 
@@ -75,7 +75,7 @@ func (r *userRepository) GetUserByUsername(username string) (*models.User, error
 // GetUsers implements UserRepository.
 func (r *userRepository) GetUsers() ([]*models.User, error) {
 	var users []*models.User
-	query := `SELECT id, username, full_name, email, role_id, created_at, updated_at`
+	query := `SELECT id, username, full_name, email, role_id, created_at, updated_at FROM users`
 
 	rows, err := config.DB.Query(context.Background(), query)
 
@@ -108,7 +108,7 @@ func (r *userRepository) DeleteUser(id int) (int, error) {
 // UpdateUser implements UserRepository.
 func (r *userRepository) UpdateUser(id int, user *models.User) (*models.User, error) {
 	query := `UPDATE users 
-	SET username = $1, full_name = $2, email = $3, password_hashed = $4, role_id = $5 
+	SET username = $1, full_name = $2, email = $3, password_hash = $4, role_id = $5 
 	WHERE id = $6
 	RETURNING id, username, full_name, email, role_id, created_at, updated_at`
 

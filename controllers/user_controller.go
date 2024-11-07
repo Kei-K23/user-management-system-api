@@ -28,6 +28,7 @@ func (r *UserController) CreateUser(c *fiber.Ctx) error {
 	user, err := r.userService.Create(input.Username, input.FullName, input.Email, input.Password, input.RoleId)
 
 	if err != nil {
+
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create user"})
 	}
 
